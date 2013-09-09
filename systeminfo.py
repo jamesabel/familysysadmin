@@ -6,6 +6,8 @@ import psutil
 import time
 import uptime
 
+# gather up the system info
+
 class systeminfo :
     def __init__(self):
         self.computername = None
@@ -17,7 +19,8 @@ class systeminfo :
         self.disks = psutil.disk_partitions(all=True)
         return self.info
 
-    def str(self):
+    # put the system info into an ENML compatible string
+    def get_enml_str(self):
         self.get()
         sep = '<br/>\n'
         s = "computername : " + self.computername + sep

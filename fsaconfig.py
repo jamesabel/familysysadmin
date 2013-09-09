@@ -2,6 +2,8 @@
 import os
 import ConfigParser
 
+# config management (stores persistent data)
+
 class FSAConfig:
     def __init__(self, app_name):
         self.app_name = app_name

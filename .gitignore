@@ -1,0 +1,24 @@
+#
+# the usual things to not put in the repo
+*.zip
+temp.*
+temp/
+repo_ignore/
+dist/
+history/
+secret/
+secret.*
+*.ini
+*.log
+*.tlog
+*.obj
+*.pdb
+*.tb6
+*.pyc
+*.lastbuildstate
+#
+# from PyCharm
+.idea
+#
+# using MANIFEST.in to drive builds
+MANIFEST

@@ -9,6 +9,8 @@ setup(
     url='www.lat.us',
     license='LICENSE',
     description = "family system admin",
+    long_description="family system admin",
     py_modules=['*'],
+    platforms=['windows'],
     executables = [Executable("familysysadmin.py")]
 )

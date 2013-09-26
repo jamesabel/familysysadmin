@@ -3,4 +3,12 @@ include LICENSE
 include .gitignore
 include *.bat
 include *.py
+include *.txt
+include *.md
+recursive-include familysysadmin *.py
 prune repo_ignore
+prune secret
+prune history
+prune build
+prune dist
+prune *.ini

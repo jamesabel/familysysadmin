@@ -1,5 +1,6 @@
 import platform
 import threading
+import sys
 
 import ConfigParser
 import psutil
@@ -20,7 +21,7 @@ class FamilySysAdmin:
         self.auth_token = config.get_auth_token()
         if self.auth_token is None:
             print("error:auth_token not initialized - please put it in the secret area")
-            exit()
+            sys.exit()
 
     def run(self):
         continue_control_timeout = 3 # fast for testing, slow for regular use

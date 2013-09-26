@@ -1,1 +1,1 @@
-c:\python27\python main_cli.py -v
+c:\python27\python familysysadmin.py -v

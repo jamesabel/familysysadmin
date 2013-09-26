@@ -6,8 +6,7 @@ temp/
 repo_ignore/
 dist/
 history/
-secret/
-secret.*
+build/
 *.ini
 *.log
 *.tlog
@@ -16,6 +15,9 @@ secret.*
 *.tb6
 *.pyc
 *.lastbuildstate
+#
+# where the secret keys are kept
+secret.*
 #
 # from PyCharm
 .idea

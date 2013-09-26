@@ -1,0 +1,6 @@
+
+include LICENSE
+include .gitignore
+include *.bat
+include *.py
+prune repo_ignore

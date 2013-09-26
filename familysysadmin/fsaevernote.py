@@ -1,8 +1,8 @@
 import os
-import systeminfo
 import evernote.edam.userstore.constants as UserStoreConstants
 
 # evernote specific routines
+import systeminfo
 
 def checks(user_store):
     version_ok = user_store.checkVersion(

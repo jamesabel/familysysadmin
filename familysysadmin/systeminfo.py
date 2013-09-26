@@ -19,8 +19,11 @@ class systeminfo :
         self.disks = psutil.disk_partitions(all=True)
         for disk in self.disks:
             disk_path = disk[0]
-            disk_usage = str(psutil.disk_usage(disk_path)[3])
-            self.states[disk_path] = disk_usage + '%'
+            try:
+                disk_usage = str(psutil.disk_usage(disk_path)[3])
+                self.states[disk_path] = disk_usage + '%'
+            except:
+                print("warning: can not access", disk_path)
         self.states['usertime'] = str(os.times()[0])
         self.states['systemtime'] = str(os.times()[1])
         self.states['uptime'] = str(datetime.timedelta(seconds = uptime.uptime()))

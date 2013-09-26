@@ -21,7 +21,7 @@ class FamilySysAdmin:
 
         if self.test_mode:
             # use sandbox
-            config = fsaconfig.FSAConfig(self.app_name)
+            config = fsaconfig.FSAConfig(self.app_name, self.verbose)
             self.auth_token = config.get_auth_token()
             if self.auth_token is None:
                 print("error:auth_token not initialized - please put it in the secret area")
@@ -51,7 +51,7 @@ class FamilySysAdmin:
             if network_ok:
                 fsaevernote.checks(user_store)
 
-                config = fsaconfig.FSAConfig(self.app_name)
+                config = fsaconfig.FSAConfig(self.app_name, self.verbose)
                 config_guid = config.get_guid() # get the guid associated with this note (None if 1st time run)
                 if config_guid is None:
                     # create a new note

@@ -5,11 +5,14 @@ import ConfigParser
 # config management (stores persistent data)
 
 class FSAConfig:
-    def __init__(self, app_name):
+    def __init__(self, app_name, verbose=False):
         self.app_name = app_name
+        self.verbose = verbose
         self.section = 'evernote'
         self.config = ConfigParser.SafeConfigParser()
         self.config_file_path = app_name + '.ini'
+        if self.verbose:
+            print("config_file:", self.config_file_path)
 
     def exists(self):
         return os.path.exists(self.config_file_path)

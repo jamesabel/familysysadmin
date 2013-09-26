@@ -4,7 +4,6 @@
 temp.*
 temp/
 repo_ignore/
-dist/
 history/
 build/
 *.ini

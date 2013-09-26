@@ -16,7 +16,8 @@ build/
 *.lastbuildstate
 #
 # where the secret keys are kept
-secret.*
+secret\
+secret.ini
 #
 # from PyCharm
 .idea

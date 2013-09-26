@@ -10,20 +10,19 @@ from evernote.api.client import EvernoteClient
 import fsaevernote
 import fsaconfig
 import exitcontrol
-import secret
-
-
-fsaevernote.check_secret_exists() # if we don't have the secret, print an error message at executable time
-
 
 class FamilySysAdmin:
 
     def __init__(self, verbose = False):
         self.verbose = verbose
+        self.app_name = "familysysadmin"
+        config = fsaconfig.FSAConfig(self.app_name)
+        self.auth_token = config.get_auth_token()
+        if self.auth_token is None:
+            print("error:auth_token not initialized - please put it in the secret area")
+            exit()
 
     def run(self):
-        app_name = "familysysadmin"
-
         continue_control_timeout = 3 # fast for testing, slow for regular use
 
         continue_control = threading.Event()
@@ -32,7 +31,7 @@ class FamilySysAdmin:
         exit_control.setup(events=[continue_control,], exit_criteria='q')
         exit_control.start()
 
-        client = EvernoteClient(token=secret.auth_token, sandbox=True)
+        client = EvernoteClient(token=self.auth_token, sandbox=True)
 
         while not exit_control.get_exit_control_flag():
 
@@ -47,7 +46,7 @@ class FamilySysAdmin:
             if network_ok:
                 fsaevernote.checks(user_store)
 
-                config = fsaconfig.FSAConfig(app_name)
+                config = fsaconfig.FSAConfig(self.app_name)
                 config_guid = config.get_guid() # get the guid associated with this note (None if 1st time run)
                 if config_guid is None:
                     # create a new note

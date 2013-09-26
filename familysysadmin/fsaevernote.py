@@ -18,10 +18,10 @@ def checks(user_store):
 
 # For testing, the developer must provide secret.py and it must have:
 # auth_token = "your developer token"
-def check_secret_exists():
-    if not os.path.exists('secret.py'):
-        print("For testing, the developer must provide secret.py and it must look like:")
-        print('auth_token = "your developer token"')
+#def check_secret_exists():
+#    if not os.path.exists('secret.py'):
+#        print("For testing, the developer must provide secret.py and it must look like:")
+#        print('auth_token = "your developer token"')
 
 # create the note string in ENML
 def create_note_enml(note):

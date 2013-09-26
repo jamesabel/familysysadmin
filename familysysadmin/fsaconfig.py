@@ -29,6 +29,14 @@ class FSAConfig:
                 guid = self.config.get(self.section, 'guid')
         return guid
 
+    def get_auth_token(self):
+        auth_token = None
+        if self.exists():
+            self.config.read(os.path.join('secret', 'secret.ini'))
+            if self.config.has_section(self.section):
+                auth_token = self.config.get(self.section, 'auth_token')
+        return auth_token
+
     def write(self):
         with open(self.config_file_path, 'wb') as configfile:
             self.config.write(configfile)

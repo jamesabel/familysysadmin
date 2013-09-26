@@ -32,7 +32,7 @@ class FSAConfig:
     def get_auth_token(self):
         auth_token = None
         if self.exists():
-            self.config.read(os.path.join('secret', 'secret.ini'))
+            self.config.read(self.config_file_path)
             if self.config.has_section(self.section):
                 auth_token = self.config.get(self.section, 'auth_token')
         return auth_token

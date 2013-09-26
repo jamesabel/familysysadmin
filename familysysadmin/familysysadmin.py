@@ -14,14 +14,18 @@ import exitcontrol
 
 class FamilySysAdmin:
 
-    def __init__(self, verbose = False):
+    def __init__(self, test_mode = False, verbose = False):
         self.verbose = verbose
+        self.test_mode = test_mode
         self.app_name = "familysysadmin"
-        config = fsaconfig.FSAConfig(self.app_name)
-        self.auth_token = config.get_auth_token()
-        if self.auth_token is None:
-            print("error:auth_token not initialized - please put it in the secret area")
-            sys.exit()
+
+        if self.test_mode:
+            # use sandbox
+            config = fsaconfig.FSAConfig(self.app_name)
+            self.auth_token = config.get_auth_token()
+            if self.auth_token is None:
+                print("error:auth_token not initialized - please put it in the secret area")
+                sys.exit()
 
     def run(self):
         continue_control_timeout = 3 # fast for testing, slow for regular use

@@ -1,6 +1,3 @@
-import platform
-import threading
-import sys
 import ConfigParser
 import psutil
 import wx

@@ -1,0 +1,1 @@
+c:\python27\python.exe C:\Python27\Lib\site-packages\wx-2.9.4-msw\wx\tools\img2py.py -i -F icons\uiicon.ico uiicon.py

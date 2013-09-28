@@ -1,7 +1,6 @@
-import os
 import wx
 
-import familysysadmin
+import uiicon
 
 class SysTray(wx.Frame):
     TBMENU_STATUS = 1000
@@ -12,8 +11,7 @@ class SysTray(wx.Frame):
         name = 'FSA'
         frame_size = (100,100) # doesn't really matter since it will never be shown
         wx.Frame.__init__(self, None, -1, name, size = frame_size)
-        # todo: embed the icon in a .py file
-        icon = wx.Icon(os.path.join('familysysadmin','icons','binoculars.ico'), wx.BITMAP_TYPE_ICO)
+        icon = uiicon.uiicon.getIcon()
         self.SetIcon(icon)
         # setup a taskbar icon, and catch some events from it
         self.tbicon = wx.TaskBarIcon()

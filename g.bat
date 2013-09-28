@@ -1,1 +1,1 @@
-c:\python27\python familysysadmin.py -v -t
+c:\python27\python familysysadmin.py -v

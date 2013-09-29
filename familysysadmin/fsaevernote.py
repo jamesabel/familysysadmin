@@ -4,7 +4,7 @@ import evernote.edam.userstore.constants as UserStoreConstants
 import evernote.edam.type.ttypes as EvernoteTypes
 from evernote.api.client import EvernoteClient
 
-import fsaconfig
+import settings
 
 # todo: put try around everything that accesses the network
 
@@ -17,8 +17,8 @@ class FSAEvernote:
         self.verbose = verbose
         self.mute = mute # for testing but stay offline
         if not self.mute:
-            config = fsaconfig.FSAConfig(self.verbose)
-            auth_token = config.get('auth_token')
+            app_settings = settings.SettingsDialog()
+            auth_token = app_settings.get('auth_token')
             self.client = EvernoteClient(token=auth_token, sandbox=True)
 
     def checks(self):
@@ -48,13 +48,13 @@ class FSAEvernote:
         except:
             self.network_ok = False
 
-    def create_note(self, title):
+    def create_note(self, title, systeminfo):
         if self.mute:
             return
         # create a new note
         self.note = EvernoteTypes.Note()
         self.note.title = title
-        self.create_note_enml(self.note)
+        self.create_note_enml(self.note, systeminfo)
         created_note = self.note_store.createNote(self.note)
         if self.verbose:
             print("created note", created_note.guid)

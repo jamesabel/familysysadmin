@@ -1,6 +1,8 @@
+
 import wx
 
 import uiicon
+import settings
 
 class SysTray(wx.Frame):
     TBMENU_REFRESH = 1000
@@ -8,16 +10,15 @@ class SysTray(wx.Frame):
     TBMENU_SETTINGS = 1002
     TBMENU_CLOSE  = 1003
 
-    def __init__(self, fsa):
-        self.fsa = fsa
-        name = 'FSA'
+    def __init__(self, app):
+        self.app = app
         frame_size = (100,100) # doesn't really matter since it will never be shown
-        wx.Frame.__init__(self, None, -1, name, size = frame_size)
+        wx.Frame.__init__(self, None, -1, self.app.GetAppName(), size = frame_size)
         icon = uiicon.uiicon.getIcon()
         self.SetIcon(icon)
         # setup a taskbar icon, and catch some events from it
         self.tbicon = wx.TaskBarIcon()
-        self.tbicon.SetIcon(icon, name)
+        self.tbicon.SetIcon(icon, self.app.GetAppName())
         wx.EVT_TASKBAR_LEFT_DOWN(self.tbicon, self.OnTaskBarMenu)
         wx.EVT_TASKBAR_RIGHT_DOWN(self.tbicon, self.OnTaskBarMenu)
         wx.EVT_MENU(self.tbicon, self.TBMENU_REFRESH, self.OnTaskBarRefresh)
@@ -35,16 +36,17 @@ class SysTray(wx.Frame):
         menu.Destroy()
 
     def OnTaskBarRefresh(self, evt):
-        self.fsa.monitor.update_monitor()
+        self.app.monitor.update_monitor()
 
     def OnTaskBarStatus(self, evt):
         pass
 
     def OnTaskBarSettings(self, evt):
-        pass
+        frame = settings.SettingsDialog()
+        frame.Show(True)
 
     def OnTaskBarClose(self, evt):
-        self.fsa.monitor.stop_monitor()
+        self.app.monitor.stop_monitor()
         self.tbicon.Destroy()
         self.Destroy()
 

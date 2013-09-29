@@ -10,17 +10,18 @@ import uptime
 import collections
 
 import fsaevernote
-import fsaconfig
+import settings
 
 class Monitor(threading.Thread):
     def run(self):
         self.continue_control = threading.Event()
+        self.timeout = threading.Event()
         self.test_mode = True
         self.verbose = True
-        config = fsaconfig.FSAConfig(self.verbose)
+        app_settings = settings.SettingsDialog()
         if self.test_mode:
             # use sandbox
-            self.auth_token = config.get('auth_token')
+            self.auth_token = app_settings.get('auth_token')
             if self.auth_token is None:
                 print("error:auth_token not initialized - please put it in the secret area")
                 sys.exit()
@@ -28,22 +29,21 @@ class Monitor(threading.Thread):
         fsa_note = fsaevernote.FSAEvernote(verbose = True)
         # todo: loop this in a separate thread, that can be stopped on close of the GUI
         #while continue_control.is_set():
-        self.timeout = threading.Event()
         while not self.continue_control.is_set():
             fsa_note.init_stores()
             if fsa_note.network_ok:
                 fsa_note.checks()
-                config_guid = config.get('guid') # get the guid associated with this note (None if 1st time run)
+                config_guid = app_settings.get('guid') # get the guid associated with this note (None if 1st time run)
                 if config_guid is None:
-                    config_guid = fsa_note.create_note(platform.node())
-                    config.set('guid', config_guid)
+                    config_guid = fsa_note.create_note(platform.node(), self.get_systeminfo())
+                    app_settings.set('guid', config_guid)
                 else:
                     # update the existing note
                     fsa_note.update_note(config_guid, self.get_systeminfo())
             else:
                 print("network down")
             self.timeout.clear()
-            self.timeout.wait(3)
+            self.timeout.wait(60*60) # todo: make this a configuration option
 
     def update_monitor(self):
         self.timeout.set()

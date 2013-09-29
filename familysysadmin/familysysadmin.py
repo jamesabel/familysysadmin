@@ -3,14 +3,15 @@ import psutil
 import wx
 
 import fsaevernote
-import fsaconfig
-import systray
+import settings
+import gui
 import monitor
 
-class FamilySysAdmin(wx.App):
+class FamilySysAdminApp(wx.App):
 
     def OnInit(self):
-        frame = systray.SysTray(self)
+        print("AppName", self.GetAppName())
+        frame = gui.SysTray(self)
         frame.Show(False) # we have a window, but we never show it
 
         self.monitor = monitor.Monitor()

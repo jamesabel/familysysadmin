@@ -14,6 +14,7 @@ import fsaconfig
 
 class Monitor(threading.Thread):
     def run(self):
+        self.continue_control = threading.Event()
         self.test_mode = True
         self.verbose = True
         config = fsaconfig.FSAConfig(self.verbose)
@@ -27,7 +28,8 @@ class Monitor(threading.Thread):
         fsa_note = fsaevernote.FSAEvernote(verbose = True)
         # todo: loop this in a separate thread, that can be stopped on close of the GUI
         #while continue_control.is_set():
-        if True:
+        self.timeout = threading.Event()
+        while not self.continue_control.is_set():
             fsa_note.init_stores()
             if fsa_note.network_ok:
                 fsa_note.checks()
@@ -40,6 +42,15 @@ class Monitor(threading.Thread):
                     fsa_note.update_note(config_guid, self.get_systeminfo())
             else:
                 print("network down")
+            self.timeout.clear()
+            self.timeout.wait(3)
+
+    def update_monitor(self):
+        self.timeout.set()
+
+    def stop_monitor(self):
+        self.timeout.set()
+        self.continue_control.set()
 
     def get_systeminfo(self):
         self.states = collections.OrderedDict()

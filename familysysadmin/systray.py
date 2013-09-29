@@ -3,8 +3,10 @@ import wx
 import uiicon
 
 class SysTray(wx.Frame):
-    TBMENU_STATUS = 1000
-    TBMENU_CLOSE  = 1001
+    TBMENU_REFRESH = 1000
+    TBMENU_STATUS = 1001
+    TBMENU_SETTINGS = 1002
+    TBMENU_CLOSE  = 1003
 
     def __init__(self, fsa):
         self.fsa = fsa
@@ -18,21 +20,31 @@ class SysTray(wx.Frame):
         self.tbicon.SetIcon(icon, name)
         wx.EVT_TASKBAR_LEFT_DOWN(self.tbicon, self.OnTaskBarMenu)
         wx.EVT_TASKBAR_RIGHT_DOWN(self.tbicon, self.OnTaskBarMenu)
+        wx.EVT_MENU(self.tbicon, self.TBMENU_REFRESH, self.OnTaskBarRefresh)
         wx.EVT_MENU(self.tbicon, self.TBMENU_STATUS, self.OnTaskBarStatus)
+        wx.EVT_MENU(self.tbicon, self.TBMENU_SETTINGS, self.OnTaskBarSettings)
         wx.EVT_MENU(self.tbicon, self.TBMENU_CLOSE, self.OnTaskBarClose)
 
     def OnTaskBarMenu(self, evt):
         menu = wx.Menu()
+        menu.Append(self.TBMENU_REFRESH, "Refresh")
         menu.Append(self.TBMENU_STATUS, "Status")
+        menu.Append(self.TBMENU_SETTINGS, "Settings")
         menu.Append(self.TBMENU_CLOSE, "Close")
         self.tbicon.PopupMenu(menu)
         menu.Destroy()
 
+    def OnTaskBarRefresh(self, evt):
+        self.fsa.monitor.update_monitor()
+
     def OnTaskBarStatus(self, evt):
-        # todo: make a window and populate it
+        pass
+
+    def OnTaskBarSettings(self, evt):
         pass
 
     def OnTaskBarClose(self, evt):
+        self.fsa.monitor.stop_monitor()
         self.tbicon.Destroy()
         self.Destroy()
 

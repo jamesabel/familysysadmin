@@ -5,6 +5,8 @@ import ConfigParser
 class SettingsDialog(wx.Frame):
     def __init__(self):
         self.save_button_id = 200
+        self.border = 10
+        self.border_sides = wx.LEFT | wx.RIGHT
 
         # On Windows this writes to the registry at HKEY_CURRENT_USER\Software\<app>
         self.cfg = wx.Config()
@@ -12,7 +14,6 @@ class SettingsDialog(wx.Frame):
 
         self.cb_verbose = wx.CheckBox(self, label='Verbose')
         self.tc_guid = wx.TextCtrl(self)
-        self.string_auth_token = wx.StaticText(self, label='Auth Token:')
         self.tc_auth_token = wx.TextCtrl(self)
         self.cb_sandbox = wx.CheckBox(self, label='Sandbox')
         self.cb_mute = wx.CheckBox(self, label='Mute')
@@ -20,20 +21,19 @@ class SettingsDialog(wx.Frame):
 
         self.LoadState()
 
-        border = 10
         vbox = wx.BoxSizer(wx.VERTICAL)
-        vbox.Add(self.cb_verbose, 0, wx.LEFT, border)
-        vbox.Add(wx.StaticText(self, label=''), 0, wx.LEFT, border) # space
-        vbox.Add(wx.StaticText(self, label=''), 0, wx.LEFT, border)
-        vbox.Add(wx.StaticText(self, label='--- ADVANCED ---'), 0, wx.LEFT, border)
-        vbox.Add(self.tc_guid, 0, wx.LEFT, border)
-        vbox.Add(self.string_auth_token, 0, wx.LEFT, border)
-        vbox.Add(self.tc_auth_token, 0, wx.LEFT, border)
-        vbox.Add(self.cb_sandbox, 0, wx.LEFT, border)
-        vbox.Add(self.cb_mute, 0, wx.LEFT, border)
-        vbox.Add(wx.StaticText(self, label='----------------'), 0, wx.LEFT, border)
-        vbox.Add(wx.StaticText(self, label=''), 0, wx.LEFT, border)
-        vbox.Add(self.button_save, 0, wx.LEFT, border)
+        vbox.Add(self.cb_verbose, 0, self.border_sides, self.border)
+        vbox.Add(wx.StaticText(self, label=''), 0, self.border_sides, self.border) # space
+        vbox.Add(wx.StaticText(self, label=''), 0, self.border_sides, self.border)
+
+        vbox.Add(self.MakeLabeledSizer('GUID:', self.tc_guid))
+        vbox.Add(self.MakeLabeledSizer('Auth Token:', self.tc_auth_token))
+
+        vbox.Add(self.cb_sandbox, 0, self.border_sides, self.border)
+        vbox.Add(self.cb_mute, 0, self.border_sides, self.border)
+
+        vbox.Add(wx.StaticText(self, label=''), 0, self.border_sides, self.border)
+        vbox.Add(self.button_save, 0, self.border_sides, self.border)
 
         self.Bind(wx.EVT_BUTTON, self.OnSave, id=self.save_button_id)
         self.statusbar = self.CreateStatusBar()
@@ -42,10 +42,23 @@ class SettingsDialog(wx.Frame):
         self.SetSizerAndFit(vbox)
         self.Centre()
 
+    def MakeLabeledSizer(self, label_str, tc_value):
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.Add(wx.StaticText(self, label=label_str), 0, self.border_sides, self.border)
+        hbox.Add(tc_value, 0, self.border_sides, self.border)
+        return hbox
+
     def LoadState(self):
         self.cb_verbose.SetValue(self.cfg.ReadBool('verbose'))
-        self.tc_guid.SetValue(self.cfg.Read('guid'))
-        self.tc_auth_token.SetValue(self.cfg.Read('auth_token'))
+
+        guid_str = self.cfg.Read('guid')
+        self.tc_guid.SetValue(guid_str)
+        self.tc_guid.SetMinSize(self.tc_guid.GetTextExtent(guid_str + '__')) # add spacer - for some reason the size ends up short
+
+        auth_token = self.cfg.Read('auth_token')
+        self.tc_auth_token.SetValue(auth_token)
+        self.tc_auth_token.SetMinSize(self.tc_guid.GetTextExtent(auth_token + '__'))
+
         self.cb_sandbox.SetValue(self.cfg.ReadBool('sandbox'))
         self.cb_mute.SetValue(self.cfg.ReadBool('mute'))
 

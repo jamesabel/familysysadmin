@@ -42,7 +42,7 @@ class SysTray(wx.Frame):
         pass
 
     def OnTaskBarSettings(self, evt):
-        frame = settings.SettingsDialog()
+        frame = settings.SettingsFrame()
         frame.Show(True)
 
     def OnTaskBarClose(self, evt):

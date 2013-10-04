@@ -18,7 +18,7 @@ class Monitor(threading.Thread):
         self.timeout = threading.Event()
         self.test_mode = True
         self.verbose = True
-        app_settings = settings.SettingsDialog()
+        app_settings = settings.SettingsFrame()
         if self.test_mode:
             # use sandbox
             self.auth_token = app_settings.get('auth_token')

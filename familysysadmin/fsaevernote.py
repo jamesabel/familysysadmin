@@ -17,7 +17,7 @@ class FSAEvernote:
         self.verbose = verbose
         self.mute = mute # for testing but stay offline
         if not self.mute:
-            app_settings = settings.SettingsDialog()
+            app_settings = settings.SettingsFrame()
             auth_token = app_settings.get('auth_token')
             self.client = EvernoteClient(token=auth_token, sandbox=True)
 

@@ -2,7 +2,14 @@
 import wx
 import ConfigParser
 
-# http://wiki.wxpython.org/Notebooks
+# This settings window uses wxPython.  The settings window is built up from a collection of
+# sub-windows (as is typical for this kind of UI programming).  This might seem like a lot of code for such
+# a simple window, but that's just how wx (and windows in general) works.  Each window (or sub-window) is a class.
+# It starts with a Frame (there is exactly one Frame window).  Inside the frame are 2 sub-windows - one
+# is a Notebook (Notebooks provide the tabs) and the other a Panel where the common buttons (e.g. Save, Cancel)
+# are placed.  The notebook has yet another set of sub-windows (Panels) that represent each tab.
+# 'Sizers' are used to size the windows.  Sizers are a way for the windows to automatically size themselves
+# based on the dimensions of their child windows (and add border margins, etc.).
 
 BORDER_SIZE = 10
 # TLR = top, left, right (all but bottom) - good for all but the bottom items, which should be wx.ALL
@@ -10,6 +17,9 @@ BORDER_TLR = wx.TOP | wx.LEFT | wx.RIGHT
 BUTTON_SPACER = 10
 
 class SettingsFrame(wx.Frame):
+    """
+    # The one-and-only frame window.  It also does the access into the persistent storage.
+    """
     def __init__(self):
         wx.Frame.__init__(self, None, title="Test")
 
@@ -33,7 +43,8 @@ class SettingsFrame(wx.Frame):
 
         guid_str = self.cfg.Read('guid')
         self.settings_notebook.advanced_tab.tc_guid.SetValue(guid_str)
-        self.settings_notebook.advanced_tab.tc_guid.SetMinSize(self.settings_notebook.advanced_tab.tc_guid.GetTextExtent(guid_str + '__')) # add spacer - for some reason the size ends up short
+        # add spacer - for some reason the size ends up short
+        self.settings_notebook.advanced_tab.tc_guid.SetMinSize(self.settings_notebook.advanced_tab.tc_guid.GetTextExtent(guid_str + '__'))
 
         auth_token = self.cfg.Read('auth_token')
         self.settings_notebook.advanced_tab.tc_auth_token.SetValue(auth_token)
@@ -66,8 +77,10 @@ class SettingsFrame(wx.Frame):
             val = None
         return(val)
 
-# tabbed (child) window is called a Notebook
 class SettingsNotebook(wx.Notebook):
+    """
+    The tabbed window.  A tabbed window is called a Notebook in wx.
+    """
     def __init__(self, parent):
         wx.Notebook.__init__(self, parent)
 
@@ -77,6 +90,9 @@ class SettingsNotebook(wx.Notebook):
         self.AddPage(self.advanced_tab, "Advanced")
 
 class GeneralSettingsPanel(wx.Panel):
+    """
+    General settings tab.
+    """
     def __init__(self, parent):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
 
@@ -88,6 +104,9 @@ class GeneralSettingsPanel(wx.Panel):
         self.SetSizerAndFit(vbox)
 
 class AdvancedSettingsPanel(wx.Panel):
+    """
+    Advanced settings tab.
+    """
     def __init__(self, parent):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
 
@@ -105,6 +124,9 @@ class AdvancedSettingsPanel(wx.Panel):
         self.SetSizerAndFit(vbox)
 
     def MakeLabeledSizer(self, label_str, tc_value, flag=BORDER_TLR):
+        """
+        Make a horizontal sizer for static text (StaticText) + text control (TextCtrl)
+        """
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         hbox.Add(wx.StaticText(self, label=label_str), flag=flag, border=BORDER_SIZE)
         hbox.Add(tc_value, flag=flag, border=BORDER_SIZE)

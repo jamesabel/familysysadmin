@@ -5,8 +5,6 @@ import evernote.edam.userstore.constants as UserStoreConstants
 import evernote.edam.type.ttypes as EvernoteTypes
 from evernote.api.client import EvernoteClient
 
-# todo: put try around everything that accesses the network
-
 class FSAEvernote:
     """
     evernote specific routines
@@ -15,10 +13,12 @@ class FSAEvernote:
     def __init__(self, verbose = False, mute = False):
         self.verbose = verbose
         self.mute = mute # for testing but stay offline
-        if not self.mute:
-            app_settings = wx.Config()
-            auth_token = app_settings.Read('auth_token')
-            self.client = EvernoteClient(token=auth_token, sandbox=True)
+
+    def get_client(self):
+        app_settings = wx.Config()
+        auth_token = app_settings.Read('auth_token')
+        client = EvernoteClient(token=auth_token, sandbox=app_settings.ReadBool('auth_mode_sandbox'))
+        return client
 
     def checks(self):
         if self.mute:
@@ -39,8 +39,8 @@ class FSAEvernote:
         if self.mute:
             return
         try:
-            self.user_store = self.client.get_user_store()
-            self.note_store = self.client.get_note_store()
+            self.user_store = self.get_client().get_user_store()
+            self.note_store = self.get_client().get_note_store()
             self.network_ok = True
             if self.verbose:
                 print("network OK")
@@ -62,7 +62,7 @@ class FSAEvernote:
     def update_note(self, config_guid, systeminfo):
         if self.mute:
             return
-        self.note = self.client.get_note_store().getNote(config_guid, True, True, False, False)
+        self.note = self.get_client().get_note_store().getNote(config_guid, True, True, False, False)
         self.create_note_enml(self.note, systeminfo)
         self.note_store.updateNote(self.note)
         if self.verbose:

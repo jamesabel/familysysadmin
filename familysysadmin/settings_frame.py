@@ -42,6 +42,10 @@ class SettingsFrame(wx.Frame):
     def LoadState(self):
         self.settings_notebook.general_tab.cb_verbose.SetValue(self.settings.ReadBool('verbose'))
 
+        self.settings_notebook.advanced_tab.rb_auth_mode_normal.SetValue(self.settings.ReadBool('auth_mode_normal'))
+        self.settings_notebook.advanced_tab.rb_auth_mode_dev.SetValue(self.settings.ReadBool('auth_mode_dev'))
+        self.settings_notebook.advanced_tab.rb_auth_mode_sandbox.SetValue(self.settings.ReadBool('auth_mode_sandbox'))
+
         guid_str = self.settings.Read('guid')
         self.settings_notebook.advanced_tab.tc_guid.SetValue(guid_str)
         # add spacer - for some reason the size ends up short
@@ -51,14 +55,19 @@ class SettingsFrame(wx.Frame):
         self.settings_notebook.advanced_tab.tc_auth_token.SetValue(auth_token)
         self.settings_notebook.advanced_tab.tc_auth_token.SetMinSize(self.settings_notebook.advanced_tab.tc_guid.GetTextExtent(auth_token + '__'))
 
-        self.settings_notebook.advanced_tab.cb_sandbox.SetValue(self.settings.ReadBool('sandbox'))
+        #self.settings_notebook.advanced_tab.cb_sandbox.SetValue(self.settings.ReadBool('sandbox'))
         self.settings_notebook.advanced_tab.cb_mute.SetValue(self.settings.ReadBool('mute'))
 
     def OnSave(self, event):
         self.settings.WriteBool('verbose', self.settings_notebook.general_tab.cb_verbose.GetValue())
         self.settings.Write('guid', self.settings_notebook.advanced_tab.tc_guid.GetValue())
         self.settings.Write('auth_token', self.settings_notebook.advanced_tab.tc_auth_token.GetValue())
-        self.settings.WriteBool('sandbox', self.settings_notebook.advanced_tab.cb_sandbox.GetValue())
+
+        # wx encodes radio buttons individually (each is an individual bool instead of one number per group)
+        self.settings.WriteBool('auth_mode_normal', self.settings_notebook.advanced_tab.rb_auth_mode_normal.GetValue())
+        self.settings.WriteBool('auth_mode_dev', self.settings_notebook.advanced_tab.rb_auth_mode_dev.GetValue())
+        self.settings.WriteBool('auth_mode_sandbox', self.settings_notebook.advanced_tab.rb_auth_mode_sandbox.GetValue())
+
         self.settings.WriteBool('mute', self.settings_notebook.advanced_tab.cb_mute.GetValue())
         self.GetTopLevelParent().Close()
 
@@ -98,14 +107,21 @@ class AdvancedSettingsPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
 
+        self.rb_auth_mode_normal = wx.RadioButton(self, label='Normal', style=wx.RB_GROUP)
+        self.rb_auth_mode_dev = wx.RadioButton(self, label='Developer')
+        self.rb_auth_mode_sandbox = wx.RadioButton(self, label='Sandbox')
+        auth_mode_sizer = wx.StaticBoxSizer(wx.StaticBox(self, label='Authorization Mode'), wx.VERTICAL)
+        auth_mode_sizer.Add(self.rb_auth_mode_normal, flag=BORDER_TLR, border=BORDER_SIZE)
+        auth_mode_sizer.Add(self.rb_auth_mode_dev, flag=BORDER_TLR, border=BORDER_SIZE)
+        auth_mode_sizer.Add(self.rb_auth_mode_sandbox, flag=BORDER_TLR, border=BORDER_SIZE)
+
         vbox = wx.BoxSizer(wx.VERTICAL)
         self.tc_guid = wx.TextCtrl(self)
         self.tc_auth_token = wx.TextCtrl(self)
-        self.cb_sandbox = wx.CheckBox(self, label='Sandbox')
         self.cb_mute = wx.CheckBox(self, label='Mute')
-        vbox.Add(self.cb_sandbox, flag=BORDER_TLR, border=BORDER_SIZE)
-        vbox.Add(self.cb_mute, flag=BORDER_TLR, border=BORDER_SIZE)
 
+        vbox.Add(auth_mode_sizer)
+        vbox.Add(self.cb_mute, flag=BORDER_TLR, border=BORDER_SIZE)
         vbox.Add(self.MakeLabeledSizer('GUID:', self.tc_guid))
         vbox.Add(self.MakeLabeledSizer('Auth Token:', self.tc_auth_token, wx.ALL))
 
@@ -144,7 +160,6 @@ if __name__ == "__main__":
 
             # set up some test data (actually writes it out)
             self.test_frame.set('verbose', True)
-            self.test_frame.set('sandbox', True)
             self.test_frame.set('guid', 'test_guid')
             self.test_frame.set('auth_token', 'test_auth_token')
             self.test_frame.LoadState() # load the data just written

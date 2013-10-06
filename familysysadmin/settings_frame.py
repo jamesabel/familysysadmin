@@ -1,6 +1,5 @@
 
 import wx
-import ConfigParser
 
 # This settings window uses wxPython.  The settings window is built up from a collection of
 # sub-windows (as is typical for this kind of UI programming).  This might seem like a lot of code for such
@@ -24,10 +23,12 @@ class SettingsFrame(wx.Frame):
         wx.Frame.__init__(self, None, title="Test")
 
         # On Windows this writes to the registry at HKEY_CURRENT_USER\Software\<app>
-        self.cfg = wx.Config()
+        self.settings = wx.Config()
 
         self.settings_notebook = SettingsNotebook(self)
         self.common_buttons_panel = CommonButtonsPanel(self)
+
+        self.LoadState()
 
         # match the background of the frame to the notebook
         self.SetBackgroundColour(self.settings_notebook.GetBackgroundColour())
@@ -39,43 +40,30 @@ class SettingsFrame(wx.Frame):
         self.SetSizerAndFit(sizer)
 
     def LoadState(self):
-        self.settings_notebook.general_tab.cb_verbose.SetValue(self.cfg.ReadBool('verbose'))
+        self.settings_notebook.general_tab.cb_verbose.SetValue(self.settings.ReadBool('verbose'))
 
-        guid_str = self.cfg.Read('guid')
+        guid_str = self.settings.Read('guid')
         self.settings_notebook.advanced_tab.tc_guid.SetValue(guid_str)
         # add spacer - for some reason the size ends up short
         self.settings_notebook.advanced_tab.tc_guid.SetMinSize(self.settings_notebook.advanced_tab.tc_guid.GetTextExtent(guid_str + '__'))
 
-        auth_token = self.cfg.Read('auth_token')
+        auth_token = self.settings.Read('auth_token')
         self.settings_notebook.advanced_tab.tc_auth_token.SetValue(auth_token)
         self.settings_notebook.advanced_tab.tc_auth_token.SetMinSize(self.settings_notebook.advanced_tab.tc_guid.GetTextExtent(auth_token + '__'))
 
-        self.settings_notebook.advanced_tab.cb_sandbox.SetValue(self.cfg.ReadBool('sandbox'))
-        self.settings_notebook.advanced_tab.cb_mute.SetValue(self.cfg.ReadBool('mute'))
+        self.settings_notebook.advanced_tab.cb_sandbox.SetValue(self.settings.ReadBool('sandbox'))
+        self.settings_notebook.advanced_tab.cb_mute.SetValue(self.settings.ReadBool('mute'))
 
     def OnSave(self, event):
-        self.set('verbose', self.settings_notebook.general_tab.cb_verbose.GetValue())
-        self.set('guid', self.settings_notebook.advanced_tab.tc_guid.GetValue())
-        self.set('auth_token', self.settings_notebook.advanced_tab.tc_auth_token.GetValue())
-        self.set('sandbox', self.settings_notebook.advanced_tab.cb_sandbox.GetValue())
-        self.set('mute', self.settings_notebook.advanced_tab.cb_mute.GetValue())
+        self.settings.WriteBool('verbose', self.settings_notebook.general_tab.cb_verbose.GetValue())
+        self.settings.Write('guid', self.settings_notebook.advanced_tab.tc_guid.GetValue())
+        self.settings.Write('auth_token', self.settings_notebook.advanced_tab.tc_auth_token.GetValue())
+        self.settings.WriteBool('sandbox', self.settings_notebook.advanced_tab.cb_sandbox.GetValue())
+        self.settings.WriteBool('mute', self.settings_notebook.advanced_tab.cb_mute.GetValue())
         self.GetTopLevelParent().Close()
 
     def OnCancel(self, event):
         self.GetTopLevelParent().Close()
-
-    def set(self, key, value):
-        if value is True or value is False:
-            self.cfg.WriteBool(key, value)
-        else:
-            self.cfg.Write(key, value)
-        self.cfg.Flush()
-
-    def get(self, key):
-        val = self.cfg.Read(key)
-        if len(val) < 1:
-            val = None
-        return(val)
 
 class SettingsNotebook(wx.Notebook):
     """

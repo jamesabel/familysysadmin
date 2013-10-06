@@ -1,16 +1,15 @@
 
 import threading
 import platform
-import sys
 import os
 import time
 import psutil
 import datetime
 import uptime
 import collections
+import wx
 
 import fsaevernote
-import settings
 
 class Monitor(threading.Thread):
     def run(self):
@@ -18,13 +17,13 @@ class Monitor(threading.Thread):
         self.timeout = threading.Event()
         self.test_mode = True
         self.verbose = True
-        app_settings = settings.SettingsFrame()
+        app_settings = wx.Config()
         if self.test_mode:
             # use sandbox
-            self.auth_token = app_settings.get('auth_token')
+            self.auth_token = app_settings.Read('auth_token')
             if self.auth_token is None:
-                print("error:auth_token not initialized - please put it in the secret area")
-                sys.exit()
+                print("error:auth_token not initialized")
+                self.stop_monitor()
 
         fsa_note = fsaevernote.FSAEvernote(verbose = True)
         # todo: loop this in a separate thread, that can be stopped on close of the GUI
@@ -33,10 +32,10 @@ class Monitor(threading.Thread):
             fsa_note.init_stores()
             if fsa_note.network_ok:
                 fsa_note.checks()
-                config_guid = app_settings.get('guid') # get the guid associated with this note (None if 1st time run)
-                if config_guid is None:
+                config_guid = app_settings.Read('guid') # get the guid associated with this note (None if 1st time run)
+                if len(config_guid) < 1 :
                     config_guid = fsa_note.create_note(platform.node(), self.get_systeminfo())
-                    app_settings.set('guid', config_guid)
+                    app_settings.Write('guid', config_guid)
                 else:
                     # update the existing note
                     fsa_note.update_note(config_guid, self.get_systeminfo())
@@ -46,11 +45,13 @@ class Monitor(threading.Thread):
             self.timeout.wait(60*60) # todo: make this a configuration option
 
     def update_monitor(self):
+        print("update")
         self.timeout.set()
 
     def stop_monitor(self):
-        self.timeout.set()
+        print("stopping")
         self.continue_control.set()
+        self.timeout.set()
 
     def get_systeminfo(self):
         self.states = collections.OrderedDict()

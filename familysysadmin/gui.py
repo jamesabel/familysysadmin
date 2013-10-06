@@ -2,7 +2,8 @@
 import wx
 
 import uiicon
-import settings
+import settings_frame
+import monitor
 
 class SysTray(wx.Frame):
     TBMENU_REFRESH = 1000
@@ -10,15 +11,17 @@ class SysTray(wx.Frame):
     TBMENU_SETTINGS = 1002
     TBMENU_CLOSE  = 1003
 
-    def __init__(self, app):
-        self.app = app
+    def __init__(self):
+
+        self.monitor = monitor.Monitor()
+        self.monitor.start()
         frame_size = (100,100) # doesn't really matter since it will never be shown
-        wx.Frame.__init__(self, None, -1, self.app.GetAppName(), size = frame_size)
+        wx.Frame.__init__(self, None, -1, "familysysadmin", size = frame_size) # todo: reach into app to get name
         icon = uiicon.uiicon.getIcon()
         self.SetIcon(icon)
         # setup a taskbar icon, and catch some events from it
         self.tbicon = wx.TaskBarIcon()
-        self.tbicon.SetIcon(icon, self.app.GetAppName())
+        self.tbicon.SetIcon(icon, "familysysadmin") # todo: reach into app to get name
         wx.EVT_TASKBAR_LEFT_DOWN(self.tbicon, self.OnTaskBarMenu)
         wx.EVT_TASKBAR_RIGHT_DOWN(self.tbicon, self.OnTaskBarMenu)
         wx.EVT_MENU(self.tbicon, self.TBMENU_REFRESH, self.OnTaskBarRefresh)
@@ -36,17 +39,18 @@ class SysTray(wx.Frame):
         menu.Destroy()
 
     def OnTaskBarRefresh(self, evt):
-        self.app.monitor.update_monitor()
+        self.monitor.update_monitor()
 
     def OnTaskBarStatus(self, evt):
+        print("OnTaskBarStatus not yet implemented")
         pass
 
     def OnTaskBarSettings(self, evt):
-        frame = settings.SettingsFrame()
+        frame = settings_frame.SettingsFrame()
         frame.Show(True)
 
     def OnTaskBarClose(self, evt):
-        self.app.monitor.stop_monitor()
+        self.monitor.stop_monitor()
         self.tbicon.Destroy()
         self.Destroy()
 

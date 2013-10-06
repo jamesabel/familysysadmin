@@ -1,10 +1,9 @@
 import sys
+import wx
 
 import evernote.edam.userstore.constants as UserStoreConstants
 import evernote.edam.type.ttypes as EvernoteTypes
 from evernote.api.client import EvernoteClient
-
-import settings
 
 # todo: put try around everything that accesses the network
 
@@ -17,8 +16,8 @@ class FSAEvernote:
         self.verbose = verbose
         self.mute = mute # for testing but stay offline
         if not self.mute:
-            app_settings = settings.SettingsFrame()
-            auth_token = app_settings.get('auth_token')
+            app_settings = wx.Config()
+            auth_token = app_settings.Read('auth_token')
             self.client = EvernoteClient(token=auth_token, sandbox=True)
 
     def checks(self):

@@ -15,19 +15,9 @@ class Monitor(threading.Thread):
     def run(self):
         self.continue_control = threading.Event()
         self.timeout = threading.Event()
-        self.test_mode = True
         self.verbose = True
         app_settings = wx.Config()
-        if self.test_mode:
-            # use sandbox
-            self.auth_token = app_settings.Read('auth_token')
-            if self.auth_token is None:
-                print("error:auth_token not initialized")
-                self.stop_monitor()
-
         fsa_note = fsaevernote.FSAEvernote(verbose = True)
-        # todo: loop this in a separate thread, that can be stopped on close of the GUI
-        #while continue_control.is_set():
         while not self.continue_control.is_set():
             fsa_note.init_stores()
             if fsa_note.network_ok:
@@ -40,7 +30,7 @@ class Monitor(threading.Thread):
                     # update the existing note
                     fsa_note.update_note(config_guid, self.get_systeminfo())
             else:
-                print("network down")
+                print("problem accessing evernote servers")
             self.timeout.clear()
             self.timeout.wait(60*60) # todo: make this a configuration option
 

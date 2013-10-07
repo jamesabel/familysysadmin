@@ -15,6 +15,8 @@ BORDER_SIZE = 10
 BORDER_TLR = wx.TOP | wx.LEFT | wx.RIGHT
 BUTTON_SPACER = 10
 
+# todo: set a minimum size for token text boxes so it's possible to paste into them (currently they are like 1 char big if not initialized)
+
 class SettingsFrame(wx.Frame):
     """
     # The one-and-only frame window.  It also does the access into the persistent storage.
@@ -51,9 +53,13 @@ class SettingsFrame(wx.Frame):
         # add spacer - for some reason the size ends up short
         self.settings_notebook.advanced_tab.tc_guid.SetMinSize(self.settings_notebook.advanced_tab.tc_guid.GetTextExtent(guid_str + '__'))
 
-        auth_token = self.settings.Read('auth_token')
-        self.settings_notebook.advanced_tab.tc_auth_token.SetValue(auth_token)
-        self.settings_notebook.advanced_tab.tc_auth_token.SetMinSize(self.settings_notebook.advanced_tab.tc_guid.GetTextExtent(auth_token + '__'))
+        sandbox_token = self.settings.Read('sandbox_token')
+        self.settings_notebook.advanced_tab.tc_sandbox_token.SetValue(sandbox_token)
+        self.settings_notebook.advanced_tab.tc_sandbox_token.SetMinSize(self.settings_notebook.advanced_tab.tc_guid.GetTextExtent(sandbox_token + '__'))
+
+        dev_token = self.settings.Read('dev_token')
+        self.settings_notebook.advanced_tab.tc_dev_token.SetValue(dev_token)
+        self.settings_notebook.advanced_tab.tc_dev_token.SetMinSize(self.settings_notebook.advanced_tab.tc_guid.GetTextExtent(dev_token + '__'))
 
         #self.settings_notebook.advanced_tab.cb_sandbox.SetValue(self.settings.ReadBool('sandbox'))
         self.settings_notebook.advanced_tab.cb_mute.SetValue(self.settings.ReadBool('mute'))
@@ -61,7 +67,8 @@ class SettingsFrame(wx.Frame):
     def OnSave(self, event):
         self.settings.WriteBool('verbose', self.settings_notebook.general_tab.cb_verbose.GetValue())
         self.settings.Write('guid', self.settings_notebook.advanced_tab.tc_guid.GetValue())
-        self.settings.Write('auth_token', self.settings_notebook.advanced_tab.tc_auth_token.GetValue())
+        self.settings.Write('sandbox_token', self.settings_notebook.advanced_tab.tc_sandbox_token.GetValue())
+        self.settings.Write('dev_token', self.settings_notebook.advanced_tab.tc_dev_token.GetValue())
 
         # wx encodes radio buttons individually (each is an individual bool instead of one number per group)
         self.settings.WriteBool('auth_mode_normal', self.settings_notebook.advanced_tab.rb_auth_mode_normal.GetValue())
@@ -107,8 +114,9 @@ class AdvancedSettingsPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
 
-        self.rb_auth_mode_normal = wx.RadioButton(self, label='Normal', style=wx.RB_GROUP)
-        self.rb_auth_mode_dev = wx.RadioButton(self, label='Developer')
+        # auth mode radio buttons
+        self.rb_auth_mode_normal = wx.RadioButton(self, label='Normal User', style=wx.RB_GROUP)
+        self.rb_auth_mode_dev = wx.RadioButton(self, label='Developer (non-sandbox)')
         self.rb_auth_mode_sandbox = wx.RadioButton(self, label='Sandbox')
         auth_mode_sizer = wx.StaticBoxSizer(wx.StaticBox(self, label='Authorization Mode'), wx.VERTICAL)
         auth_mode_sizer.Add(self.rb_auth_mode_normal, flag=BORDER_TLR, border=BORDER_SIZE)
@@ -117,13 +125,15 @@ class AdvancedSettingsPanel(wx.Panel):
 
         vbox = wx.BoxSizer(wx.VERTICAL)
         self.tc_guid = wx.TextCtrl(self)
-        self.tc_auth_token = wx.TextCtrl(self)
+        self.tc_sandbox_token = wx.TextCtrl(self)
+        self.tc_dev_token = wx.TextCtrl(self)
         self.cb_mute = wx.CheckBox(self, label='Mute')
 
         vbox.Add(auth_mode_sizer)
         vbox.Add(self.cb_mute, flag=BORDER_TLR, border=BORDER_SIZE)
         vbox.Add(self.MakeLabeledSizer('GUID:', self.tc_guid))
-        vbox.Add(self.MakeLabeledSizer('Auth Token:', self.tc_auth_token, wx.ALL))
+        vbox.Add(self.MakeLabeledSizer('Sandbox Token:', self.tc_sandbox_token, wx.ALL))
+        vbox.Add(self.MakeLabeledSizer('Developer Token:', self.tc_dev_token, wx.ALL))
 
         self.SetSizerAndFit(vbox)
 
@@ -161,7 +171,7 @@ if __name__ == "__main__":
             # set up some test data (actually writes it out)
             self.test_frame.set('verbose', True)
             self.test_frame.set('guid', 'test_guid')
-            self.test_frame.set('auth_token', 'test_auth_token')
+            self.test_frame.set('sandbox_token', 'test_sandbox_tokenn')
             self.test_frame.LoadState() # load the data just written
 
             self.test_frame.Show()

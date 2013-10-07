@@ -5,6 +5,11 @@ import evernote.edam.userstore.constants as UserStoreConstants
 import evernote.edam.type.ttypes as EvernoteTypes
 from evernote.api.client import EvernoteClient
 
+# todo: fix the bug where we go back and forth from sandbox to developer and the logic with the existence
+# of the GUID is broken.  If in one mode we create a note, we think the note exists but in reality
+# it doesn't exist for the other mode (sandbox/developer).  Simple fix would be to have sandbox, developer and
+# normal GUIDs.
+
 class FSAEvernote:
     """
     evernote specific routines
@@ -15,10 +20,29 @@ class FSAEvernote:
         self.mute = mute # for testing but stay offline
 
     def get_client(self):
+        self.client = None
         app_settings = wx.Config()
-        auth_token = app_settings.Read('auth_token')
-        client = EvernoteClient(token=auth_token, sandbox=app_settings.ReadBool('auth_mode_sandbox'))
-        return client
+
+        # http://dev.evernote.com/doc/articles/authentication.php
+        if app_settings.ReadBool('auth_mode_sandbox'):
+            # https://sandbox.evernote.com/api/DeveloperToken.action
+            sandbox_token = app_settings.Read('sandbox_token')
+            if self.verbose:
+                print("sandbox_token", sandbox_token)
+            # I'm not sure what the default to EvernoteClient(sandbox) is, so provide it each time.
+            # (if I don't I get an auth error)
+            self.client = EvernoteClient(token=sandbox_token, sandbox=True)
+        elif app_settings.ReadBool('auth_mode_dev'):
+            # https://www.evernote.com/api/DeveloperToken.action
+            dev_token = app_settings.Read('dev_token')
+            if self.verbose:
+                print("dev_token", dev_token)
+            self.client = EvernoteClient(token=dev_token, sandbox=False)
+        elif app_settings.ReadBool('auth_mode_normal'):
+            print("auth_mode_normal not yet implemented")
+        else:
+            print("unknown auth mode")
+        return self.client
 
     def checks(self):
         if self.mute:
@@ -38,14 +62,20 @@ class FSAEvernote:
     def init_stores(self):
         if self.mute:
             return
-        try:
-            self.user_store = self.get_client().get_user_store()
-            self.note_store = self.get_client().get_note_store()
-            self.network_ok = True
-            if self.verbose:
-                print("network OK")
-        except:
-            self.network_ok = False
+        #try:
+        self.get_client()
+        self.user_store = self.client.get_user_store()
+        print("user_store", self.user_store.checkVersion("Evernote EDAMTest (Python)",
+            UserStoreConstants.EDAM_VERSION_MAJOR,
+            UserStoreConstants.EDAM_VERSION_MINOR))
+        if self.verbose:
+            print("user", self.user_store.getUser())
+        self.note_store = self.client.get_note_store()
+        self.network_ok = True
+        if self.verbose:
+            print("evernote server access OK")
+        #except:
+        #    self.network_ok = False
 
     def create_note(self, title, systeminfo):
         if self.mute:

@@ -8,6 +8,7 @@ import datetime
 import uptime
 import collections
 import wx
+import win32api
 
 import fsaevernote
 
@@ -23,12 +24,11 @@ class Monitor(threading.Thread):
             if fsa_note.network_ok:
                 fsa_note.checks()
                 config_guid = app_settings.Read('guid') # get the guid associated with this note (None if 1st time run)
-                if len(config_guid) < 1 :
-                    config_guid = fsa_note.create_note(platform.node(), self.get_systeminfo())
-                    app_settings.Write('guid', config_guid)
-                else:
-                    # update the existing note
-                    fsa_note.update_note(config_guid, self.get_systeminfo())
+                if len(config_guid) > 0 :
+                    # delete the existing note
+                    fsa_note.delete_note(config_guid)
+                config_guid = fsa_note.create_note(platform.node(), self.get_systeminfo())
+                app_settings.Write('guid', config_guid)
             else:
                 print("problem accessing evernote servers")
             self.timeout.clear()
@@ -44,14 +44,19 @@ class Monitor(threading.Thread):
         self.timeout.set()
 
     def get_systeminfo(self):
+        gb = pow(1024.0,3)
         self.states = collections.OrderedDict()
         self.states['computername'] = platform.node()
+        self.states['user'] = win32api.GetUserName()
         self.disks = psutil.disk_partitions(all=True)
         for disk in self.disks:
             disk_path = disk[0]
             try:
-                disk_usage = str(psutil.disk_usage(disk_path)[3])
-                self.states[disk_path] = disk_usage + '%'
+                total, used, free, percent = psutil.disk_usage(disk_path)
+                volume_name, serial_number, max_len, flags, fs_name = win32api.GetVolumeInformation(disk_path)
+                total = total/gb # convert to gb
+                used = used/gb
+                self.states[disk_path] = str(percent) + '% (' + str(used) + ' / ' + str(total) + ' gb) (' + volume_name + ')'
             except:
                 print("warning: can not access", disk_path)
         self.states['usertime'] = str(os.times()[0])

@@ -1,8 +1,10 @@
 import sys
 import wx
 
+import evernote
 import evernote.edam.userstore.constants as UserStoreConstants
 import evernote.edam.type.ttypes as EvernoteTypes
+from evernote.edam.notestore.ttypes import NoteFilter, NotesMetadataResultSpec
 from evernote.api.client import EvernoteClient
 
 # todo: fix the bug where we go back and forth from sandbox to developer and the logic with the existence
@@ -68,8 +70,8 @@ class FSAEvernote:
         print("user_store", self.user_store.checkVersion("Evernote EDAMTest (Python)",
             UserStoreConstants.EDAM_VERSION_MAJOR,
             UserStoreConstants.EDAM_VERSION_MINOR))
-        if self.verbose:
-            print("user", self.user_store.getUser())
+        #if self.verbose:
+        #    print("user", self.user_store.getUser())
         self.note_store = self.client.get_note_store()
         self.network_ok = True
         if self.verbose:
@@ -89,14 +91,22 @@ class FSAEvernote:
             print("created note", created_note.guid)
         return created_note.guid
 
-    def update_note(self, config_guid, systeminfo):
-        if self.mute:
-            return
-        self.note = self.get_client().get_note_store().getNote(config_guid, True, True, False, False)
-        self.create_note_enml(self.note, systeminfo)
-        self.note_store.updateNote(self.note)
-        if self.verbose:
-            print("updated note", config_guid)
+    #def update_note(self, config_guid, systeminfo):
+    #    if self.mute:
+    #        return
+    #    note_store = self.get_client().get_note_store()
+    #    self.note = note_store.getNote(config_guid, True, True, False, False)
+    #    self.create_note_enml(self.note, systeminfo)
+    #    self.note_store.updateNote(self.note)
+    #    if self.verbose:
+    #        print("updated note", config_guid)
+
+    def delete_note(self, config_guid):
+        note_store = self.get_client().get_note_store()
+        try:
+            note_store.expungeNote(config_guid)
+        except evernote.edam.error.ttypes.EDAMNotFoundException:
+            pass
 
     # create the note string in ENML
     def create_note_enml(self, note, systeminfo):

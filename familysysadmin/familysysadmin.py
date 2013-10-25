@@ -2,6 +2,8 @@ import wx
 
 import gui
 
+APP_NAME = 'familysysadmin'
+
 class FamilySysAdminApp(wx.App):
 
     def OnInit(self):

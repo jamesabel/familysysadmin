@@ -14,6 +14,8 @@ if __name__ == "__main__":
     if not os.path.exists(app_data_folder):
         os.mkdir(app_data_folder)
     redirect_file = os.path.join(app_data_folder, 'log.txt')
+    if os.path.exists(redirect_file):
+        os.remove(redirect_file)
     app = familysysadmin.familysysadmin.FamilySysAdminApp(redirect=True, filename=redirect_file)
     app.MainLoop()
 

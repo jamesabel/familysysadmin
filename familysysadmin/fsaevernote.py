@@ -20,6 +20,7 @@ class FSAEvernote:
     def __init__(self, verbose = False, mute = False):
         self.verbose = verbose
         self.mute = mute # for testing but stay offline
+        self.network_ok = False
 
     def get_client(self):
         self.client = None
@@ -47,7 +48,7 @@ class FSAEvernote:
         return self.client
 
     def checks(self):
-        if self.mute:
+        if self.mute or not self.network_ok:
             return
         version_ok = self.user_store.checkVersion(
             "Evernote EDAMTest (Python)",
@@ -64,23 +65,21 @@ class FSAEvernote:
     def init_stores(self):
         if self.mute:
             return
-        #try:
         self.get_client()
-        self.user_store = self.client.get_user_store()
-        print("user_store", self.user_store.checkVersion("Evernote EDAMTest (Python)",
-            UserStoreConstants.EDAM_VERSION_MAJOR,
-            UserStoreConstants.EDAM_VERSION_MINOR))
-        #if self.verbose:
-        #    print("user", self.user_store.getUser())
-        self.note_store = self.client.get_note_store()
-        self.network_ok = True
-        if self.verbose:
-            print("evernote server access OK")
-        #except:
-        #    self.network_ok = False
+        if self.client is not None:
+            self.user_store = self.client.get_user_store()
+            print("user_store", self.user_store.checkVersion("Evernote EDAMTest (Python)",
+                UserStoreConstants.EDAM_VERSION_MAJOR,
+                UserStoreConstants.EDAM_VERSION_MINOR))
+            #if self.verbose:
+            #    print("user", self.user_store.getUser())
+            self.note_store = self.client.get_note_store()
+            self.network_ok = True
+            if self.verbose:
+                print("evernote server access OK")
 
     def create_note(self, title, systeminfo):
-        if self.mute:
+        if self.mute or not self.network_ok:
             return
         # create a new note
         self.note = EvernoteTypes.Note()
@@ -91,6 +90,7 @@ class FSAEvernote:
             print("created note", created_note.guid)
         return created_note.guid
 
+    # updating notes doesn't seem to work after ~1 day
     #def update_note(self, config_guid, systeminfo):
     #    if self.mute:
     #        return
@@ -102,6 +102,8 @@ class FSAEvernote:
     #        print("updated note", config_guid)
 
     def delete_note(self, config_guid):
+        if self.mute or not self.network_ok:
+            return
         note_store = self.get_client().get_note_store()
         try:
             note_store.expungeNote(config_guid)
